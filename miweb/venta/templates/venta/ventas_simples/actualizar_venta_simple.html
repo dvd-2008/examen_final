@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Venta Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .header-section h1 {
+            margin: 0;
+            color: #333;
+        }
+        .btn-exit {
+            background-color: #9E9E9E;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-exit:hover {
+            background-color: #757575;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #FF9800;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #F57C00;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        .success-message {
+            color: green;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .calculation-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #FF9800;
+        }
+        .calculation-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .calculation-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .calculation-label {
+            font-weight: bold;
+        }
+        .calculation-value {
+            font-weight: bold;
+            color: #FF9800;
+        }
+        .total-value {
+            font-size: 18px;
+            color: #F57C00;
+        }
+        .price-info {
+            background-color: #fff3e0;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .venta-info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .venta-info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>Actualizar Venta Simple</h1>
+            <a href="{% url 'lista_ventas_simples' %}" class="btn-exit">Salir</a>
+        </div>
+        
+        <div class="venta-info">
+            <p><strong>Código de Venta:</strong> {{ venta.cod_venta }}</p>
+            <p><strong>Fecha de Venta:</strong> {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+            <p><strong>Estado:</strong> {% if venta.anulado %}ANULADA{% else %}ACTIVA{% endif %}</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" id="ventaForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                {{ form.cliente.label_tag }}
+                {{ form.cliente }}
+                {% if form.cliente.errors %}
+                    <div class="error">{{ form.cliente.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.producto.label_tag }}
+                {{ form.producto }}
+                {% if form.producto.errors %}
+                    <div class="error">{{ form.producto.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.cantidad.label_tag }}
+                {{ form.cantidad }}
+                {% if form.cantidad.errors %}
+                    <div class="error">{{ form.cantidad.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_precio_unitario">Precio Unitario:</label>
+                <input type="number" id="id_precio_unitario" value="{{ venta.precio_unitario }}" step="0.01" readonly>
+                <div class="price-info">El precio se cargará automáticamente al seleccionar el producto</div>
+            </div>
+            
+            <div class="calculation-section">
+                <div class="calculation-row">
+                    <span class="calculation-label">Subtotal:</span>
+                    <span class="calculation-value" id="subtotal">S/. {{ venta.subtotal }}</span>
+                </div>
+                <div class="calculation-row">
+                    <span class="calculation-label">IGV (18%):</span>
+                    <span class="calculation-value" id="igv">S/. {{ venta.igv }}</span>
+                </div>
+                <div class="calculation-row">
+                    <span class="calculation-label">Total:</span>
+                    <span class="calculation-value total-value" id="total">S/. {{ venta.total }}</span>
+                </div>
+            </div>
+            
+            <button type="submit">Actualizar Venta</button>
+        </form>
+    </div>
+
+    <script>
+        // Cargar precio unitario al seleccionar producto
+        document.getElementById('id_producto').addEventListener('change', function() {
+            const productoId = this.value;
+            if (productoId) {
+                fetch(`/get_product_price/${productoId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('id_precio_unitario').value = data.precio;
+                        calcularTotales();
+                    });
+            } else {
+                document.getElementById('id_precio_unitario').value = '';
+                calcularTotales();
+            }
+        });
+        
+        // Calcular totales cuando cambia la cantidad
+        document.getElementById('id_cantidad').addEventListener('input', calcularTotales);
+        
+        function calcularTotales() {
+            const cantidad = parseFloat(document.getElementById('id_cantidad').value) || 0;
+            const precioUnitario = parseFloat(document.getElementById('id_precio_unitario').value) || 0;
+            
+            const subtotal = cantidad * precioUnitario;
+            const igv = subtotal * 0.18;
+            const total = subtotal + igv;
+            
+            document.getElementById('subtotal').textContent = `S/. ${subtotal.toFixed(2)}`;
+            document.getElementById('igv').textContent = `S/. ${igv.toFixed(2)}`;
+            document.getElementById('total').textContent = `S/. ${total.toFixed(2)}`;
+        }
+        
+        // Calcular al cargar la página
+        window.addEventListener('DOMContentLoaded', calcularTotales);
+    </script>
+</body>
+</html>

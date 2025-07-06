@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anular Venta Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .header-section h1 {
+            margin: 0;
+            color: #333;
+        }
+        .btn-exit {
+            background-color: #9E9E9E;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-exit:hover {
+            background-color: #757575;
+        }
+        .venta-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #F44336;
+        }
+        .venta-info p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .venta-info strong {
+            color: #333;
+        }
+        .btn-confirmar {
+            background-color: #F44336;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-confirmar:hover {
+            background-color: #d32f2f;
+        }
+        .btn-cancelar {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        .btn-cancelar:hover {
+            background-color: #1976D2;
+        }
+        .warning-message {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #E65100;
+        }
+        .success-message {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+        
+        /* Iconos */
+        .icon {
+            font-size: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>Anular Venta Simple</h1>
+            <a href="{% url 'lista_ventas_simples' %}" class="btn-exit">Cancelar</a>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}success-message{% else %}warning-message{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if not venta.anulado %}
+        <div class="warning-message">
+            <span class="icon">⚠️</span> ¿Está seguro que desea anular esta venta?
+        </div>
+        
+        <div class="venta-info">
+            <p><strong>Código de Venta:</strong> {{ venta.cod_venta }}</p>
+            <p><strong>Cliente:</strong> {{ venta.cliente.ape_nombre }}</p>
+            <p><strong>Producto:</strong> {{ venta.producto.nom_prod }}</p>
+            <p><strong>Cantidad:</strong> {{ venta.cantidad }}</p>
+            <p><strong>Total:</strong> S/. {{ venta.total }}</p>
+            <p><strong>Fecha:</strong> {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-confirmar">
+                <span class="icon">🗑️</span> Confirmar Anulación
+            </button>
+        </form>
+        {% else %}
+        <div class="success-message">
+            <span class="icon">✅</span> Esta venta ya ha sido anulada anteriormente
+        </div>
+        
+        <div class="venta-info">
+            <p><strong>Código de Venta:</strong> {{ venta.cod_venta }}</p>
+            <p><strong>Cliente:</strong> {{ venta.cliente.ape_nombre }}</p>
+            <p><strong>Producto:</strong> {{ venta.producto.nom_prod }}</p>
+            <p><strong>Cantidad:</strong> {{ venta.cantidad }}</p>
+            <p><strong>Total:</strong> S/. {{ venta.total }}</p>
+            <p><strong>Fecha Anulación:</strong> {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+        </div>
+        
+        <a href="{% url 'lista_ventas_simples' %}" class="btn-cancelar">
+            <span class="icon">↩️</span> Volver al listado
+        </a>
+        {% endif %}
+    </div>
+</body>
+</html>
